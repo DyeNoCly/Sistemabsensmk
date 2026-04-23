@@ -3,15 +3,14 @@
 /* ------------------------------- */
 
 body {
-    padding-top: 100px;
+    padding-top: 0;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-@media(min-width:768px) {
-    body {
-        padding-top: 50px;
-    }
+/* Override Bootstrap's navbar-fixed-top so the top navbar scrolls with the page */
+.navbar-fixed-top {
+    position: static;
 }
 
 /* Wrappers */
@@ -186,10 +185,10 @@ body {
     .navbar-static-side {
         z-index: 1000;
         position: fixed;
-        top: 51px;
+        top: 0;
         left: 0;
         width: 250px;
-        height: calc(100vh - 51px);
+        height: 100vh;
         margin-top: 0;
         background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
         box-shadow: 2px 0 8px rgba(0,0,0,0.08);
@@ -330,7 +329,7 @@ body {
         z-index: 1;
         position: absolute;
         width: 250px;
-        margin-top: 51px;
+        margin-top: 0;
     }
 
     .navbar-top-links .dropdown-messages,

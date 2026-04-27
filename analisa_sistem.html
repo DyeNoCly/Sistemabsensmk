@@ -47,6 +47,7 @@
     }
     .berjalan .diagram-title { background: #fff3e0; color: #bf360c; }
     .usulan   .diagram-title { background: #e8f5e9; color: #1b5e20; }
+    .mandiri  .diagram-title { background: #e3f2fd; color: #0d47a1; }
 
     /* ── legend ── */
     .legend {
@@ -327,6 +328,150 @@
       <text x="409" y="922" text-anchor="middle" font-size="9" fill="#555">• Data aman (DB)</text>
       <text x="409" y="934" text-anchor="middle" font-size="9" fill="#555">• Laporan otomatis</text>
       <text x="409" y="946" text-anchor="middle" font-size="9" fill="#555">• Multi-pengguna</text>
+    </svg>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       DIAGRAM 3 – ABSENSI MANDIRI SISWA
+       ══════════════════════════════════════════ -->
+  <div class="diagram-wrap mandiri">
+    <div class="diagram-title">📱 Diagram 3 – Flowchart Absensi Mandiri Siswa<br/><small style="font-weight:400">(SOP Siswa Melakukan Absensi via Aplikasi)</small></div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-box" style="background:#0288d1;border-radius:50%"></div>Mulai / Selesai</div>
+      <div class="legend-item"><div class="legend-box" style="background:#00897b"></div>Proses</div>
+      <div class="legend-item"><div class="legend-box" style="background:#ffd54f;transform:skewX(-12deg)"></div>Input / Output</div>
+      <div class="legend-item"><div class="legend-box" style="background:#7b1fa2;transform:rotate(45deg);width:14px;height:14px"></div>Keputusan</div>
+      <div class="legend-item"><div class="legend-box" style="background:#e53935;border-radius:50%"></div>Batal / Tidak Lanjut</div>
+    </div>
+
+    <svg width="460" height="1000" viewBox="0 0 460 1000">
+      <defs>
+        <marker id="arr3" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <polygon points="0 0,10 3.5,0 7" fill="#555"/>
+        </marker>
+      </defs>
+
+      <!-- MULAI -->
+      <ellipse cx="230" cy="36" rx="72" ry="26" fill="#0288d1"/>
+      <text x="230" y="40" text-anchor="middle" font-size="13" fill="#fff" font-weight="bold">MULAI</text>
+
+      <line x1="230" y1="62" x2="230" y2="82" stroke="#555" stroke-width="1.8" marker-end="url(#arr3)"/>
+
+      <!-- I1: Siswa buka aplikasi -->
+      <polygon points="110,82 350,82 340,126 120,126" fill="#ffd54f"/>
+      <text x="230" y="100" text-anchor="middle" font-size="12" fill="#333">Siswa Membuka Aplikasi</text>
+      <text x="230" y="116" text-anchor="middle" font-size="12" fill="#333">Sistem Absensi SMK</text>
+
+      <line x1="230" y1="126" x2="230" y2="146" stroke="#555" stroke-width="1.8" marker-end="url(#arr3)"/>
+
+      <!-- I2: Masukkan NIS & Password -->
+      <polygon points="110,146 350,146 340,190 120,190" fill="#ffd54f"/>
+      <text x="230" y="164" text-anchor="middle" font-size="12" fill="#333">Masukkan NIS</text>
+      <text x="230" y="180" text-anchor="middle" font-size="12" fill="#333">&amp; Password</text>
+
+      <line x1="230" y1="190" x2="230" y2="210" stroke="#555" stroke-width="1.8" marker-end="url(#arr3)"/>
+
+      <!-- D1: Login berhasil? -->
+      <polygon points="230,210 360,250 230,290 100,250" fill="#7b1fa2"/>
+      <text x="230" y="246" text-anchor="middle" font-size="11" fill="#fff">Login</text>
+      <text x="230" y="260" text-anchor="middle" font-size="11" fill="#fff">Berhasil?</text>
+
+      <!-- Tidak → loop back ke input login -->
+      <line x1="100" y1="250" x2="52" y2="250" stroke="#555" stroke-width="1.8"/>
+      <line x1="52" y1="250" x2="52" y2="168" stroke="#555" stroke-width="1.8"/>
+      <line x1="52" y1="168" x2="110" y2="168" stroke="#555" stroke-width="1.8" marker-end="url(#arr3)"/>
+      <text x="56" y="244" font-size="11" fill="#c62828" font-weight="bold">Tidak</text>
+
+      <!-- Ya → down -->
+      <line x1="230" y1="290" x2="230" y2="310" stroke="#555" stroke-width="1.8" marker-end="url(#arr3)"/>
+      <text x="244" y="302" font-size="11" fill="#2e7d32" font-weight="bold">Ya</text>
+
+      <!-- P1: Dashboard Siswa -->
+      <rect x="120" y="312" width="220" height="44" rx="6" fill="#00897b"/>
+      <text x="230" y="330" text-anchor="middle" font-size="12" fill="#fff">Masuk Dashboard</text>
+      <text x="230" y="346" text-anchor="middle" font-size="12" fill="#fff">Siswa</text>
+
+      <line x1="230" y1="356" x2="230" y2="376" stroke="#555" stroke-width="1.8" marker-end="url(#arr3)"/>
+
+      <!-- P2: Pilih Menu Absensi Mandiri -->
+      <rect x="100" y="378" width="260" height="44" rx="6" fill="#00897b"/>
+      <text x="230" y="396" text-anchor="middle" font-size="12" fill="#fff">Pilih Menu</text>
+      <text x="230" y="412" text-anchor="middle" font-size="12" fill="#fff">Absensi Mandiri</text>
+
+      <line x1="230" y1="422" x2="230" y2="442" stroke="#555" stroke-width="1.8" marker-end="url(#arr3)"/>
+
+      <!-- P3: Sistem cek jadwal aktif -->
+      <rect x="100" y="444" width="260" height="44" rx="6" fill="#00897b"/>
+      <text x="230" y="462" text-anchor="middle" font-size="12" fill="#fff">Sistem Cek Jadwal</text>
+      <text x="230" y="478" text-anchor="middle" font-size="12" fill="#fff">Aktif Hari Ini &amp; Jam</text>
+
+      <line x1="230" y1="488" x2="230" y2="508" stroke="#555" stroke-width="1.8" marker-end="url(#arr3)"/>
+
+      <!-- D2: Ada jadwal aktif? -->
+      <polygon points="230,508 360,548 230,588 100,548" fill="#7b1fa2"/>
+      <text x="230" y="544" text-anchor="middle" font-size="11" fill="#fff">Ada Jadwal</text>
+      <text x="230" y="558" text-anchor="middle" font-size="11" fill="#fff">Aktif Saat Ini?</text>
+
+      <!-- Tidak → kanan → BATAL -->
+      <line x1="360" y1="548" x2="382" y2="548" stroke="#555" stroke-width="1.8" marker-end="url(#arr3)"/>
+      <text x="362" y="542" font-size="9" fill="#c62828" font-weight="bold">Tidak</text>
+      <ellipse cx="418" cy="548" rx="34" ry="16" fill="#e53935"/>
+      <text x="418" y="553" text-anchor="middle" font-size="10" fill="#fff" font-weight="bold">BATAL</text>
+      <text x="418" y="570" text-anchor="middle" font-size="8" fill="#e53935">Tdk Ada Jadwal</text>
+
+      <!-- Ya → down -->
+      <line x1="230" y1="588" x2="230" y2="608" stroke="#555" stroke-width="1.8" marker-end="url(#arr3)"/>
+      <text x="244" y="600" font-size="11" fill="#2e7d32" font-weight="bold">Ya</text>
+
+      <!-- D3: Sudah absen hari ini? -->
+      <polygon points="230,608 360,648 230,688 100,648" fill="#7b1fa2"/>
+      <text x="230" y="644" text-anchor="middle" font-size="11" fill="#fff">Sudah Absen</text>
+      <text x="230" y="658" text-anchor="middle" font-size="11" fill="#fff">Hari Ini?</text>
+
+      <!-- Ya → kanan → BATAL -->
+      <line x1="360" y1="648" x2="382" y2="648" stroke="#555" stroke-width="1.8" marker-end="url(#arr3)"/>
+      <text x="368" y="642" font-size="9" fill="#c62828" font-weight="bold">Ya</text>
+      <ellipse cx="418" cy="648" rx="34" ry="16" fill="#e53935"/>
+      <text x="418" y="653" text-anchor="middle" font-size="10" fill="#fff" font-weight="bold">BATAL</text>
+      <text x="418" y="670" text-anchor="middle" font-size="8" fill="#e53935">Sudah Absen</text>
+
+      <!-- Tidak → down -->
+      <line x1="230" y1="688" x2="230" y2="708" stroke="#555" stroke-width="1.8" marker-end="url(#arr3)"/>
+      <text x="236" y="700" font-size="11" fill="#2e7d32" font-weight="bold">Tidak</text>
+
+      <!-- I3: Aktifkan kamera, lokasi & ambil foto -->
+      <polygon points="110,708 350,708 340,752 120,752" fill="#ffd54f"/>
+      <text x="230" y="726" text-anchor="middle" font-size="12" fill="#333">Aktifkan Kamera &amp; Lokasi</text>
+      <text x="230" y="742" text-anchor="middle" font-size="12" fill="#333">Ambil Foto Selfie</text>
+
+      <line x1="230" y1="752" x2="230" y2="772" stroke="#555" stroke-width="1.8" marker-end="url(#arr3)"/>
+
+      <!-- I4: Klik tombol Hadir -->
+      <polygon points="110,772 350,772 340,816 120,816" fill="#ffd54f"/>
+      <text x="230" y="790" text-anchor="middle" font-size="12" fill="#333">Siswa Klik Tombol</text>
+      <text x="230" y="806" text-anchor="middle" font-size="12" fill="#333">"Hadir"</text>
+
+      <line x1="230" y1="816" x2="230" y2="836" stroke="#555" stroke-width="1.8" marker-end="url(#arr3)"/>
+
+      <!-- P4: Sistem simpan ke database -->
+      <rect x="100" y="838" width="260" height="44" rx="6" fill="#00897b"/>
+      <text x="230" y="856" text-anchor="middle" font-size="12" fill="#fff">Sistem Menyimpan</text>
+      <text x="230" y="872" text-anchor="middle" font-size="12" fill="#fff">Data Absensi ke Database</text>
+
+      <line x1="230" y1="882" x2="230" y2="902" stroke="#555" stroke-width="1.8" marker-end="url(#arr3)"/>
+
+      <!-- O1: Konfirmasi berhasil -->
+      <polygon points="110,902 350,902 340,946 120,946" fill="#ffd54f"/>
+      <text x="230" y="920" text-anchor="middle" font-size="12" fill="#333">Konfirmasi Absensi</text>
+      <text x="230" y="936" text-anchor="middle" font-size="12" fill="#333">Berhasil Ditampilkan</text>
+
+      <line x1="230" y1="946" x2="230" y2="964" stroke="#555" stroke-width="1.8" marker-end="url(#arr3)"/>
+
+      <!-- SELESAI -->
+      <ellipse cx="230" cy="978" rx="72" ry="18" fill="#0288d1"/>
+      <text x="230" y="982" text-anchor="middle" font-size="13" fill="#fff" font-weight="bold">SELESAI</text>
     </svg>
   </div>
 

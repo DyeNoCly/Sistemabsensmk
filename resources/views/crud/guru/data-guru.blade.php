@@ -47,6 +47,8 @@
             </table>
         </div>
 
-        {{ $teachers->links() }}
+        @if(is_object($teachers) && method_exists($teachers, 'links'))
+            {{ $teachers->links() }}
+        @endif
     </div>
 @endsection

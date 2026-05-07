@@ -22,9 +22,13 @@ class DashboardController extends Controller
     public function __invoke(Request $request): View
     {
         $sessionUser = $request->session()->get('legacy_user', []);
+        $authType = (string) ($sessionUser['auth_type'] ?? '');
         $role = (string) ($sessionUser['level'] ?? '');
+        $viewName = $authType === 'siswa' || $role === 'user'
+            ? 'dashboard.dashboard-siswa'
+            : 'dashboard.dashboard-guru';
 
-        return view('dashboard.index', [
+        return view($viewName, [
             'sessionUser' => $sessionUser,
             'role' => $role,
             'stats' => [

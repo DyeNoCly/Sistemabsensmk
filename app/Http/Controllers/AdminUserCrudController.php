@@ -33,7 +33,7 @@ class AdminUserCrudController extends Controller
     {
         $data = $request->validate([
             'nama' => ['required', 'string', 'max:100', 'unique:user,nama'],
-            'level' => ['required', 'in:admin,guru,user'],
+            'level' => ['required', 'in:admin,guru'],
             'id' => ['required', 'integer', 'exists:sekolah,id'],
             'password' => ['required', 'string', 'min:4'],
         ]);
@@ -60,7 +60,7 @@ class AdminUserCrudController extends Controller
     {
         $data = $request->validate([
             'nama' => ['required', 'string', 'max:100', 'unique:user,nama,' . $admin_user->idu . ',idu'],
-            'level' => ['required', 'in:admin,guru,user'],
+            'level' => ['required', 'in:admin,guru'],
             'id' => ['required', 'integer', 'exists:sekolah,id'],
             'password' => ['nullable', 'string', 'min:4'],
         ]);

@@ -37,7 +37,7 @@ class ScheduleCrudController extends Controller
             $query->where('aktif', $request->integer('aktif'));
         }
 
-        return view('crud.schedules.index', [
+        return view('crud.jadwal.data-jadwal', [
             'sessionUser' => $request->session()->get('legacy_user'),
             'days' => Day::query()->orderBy('idh')->get(),
             'teachers' => Teacher::query()->orderBy('nama')->get(),
@@ -50,7 +50,7 @@ class ScheduleCrudController extends Controller
 
     public function create(Request $request): View
     {
-        return view('crud.schedules.form', [
+        return view('crud.jadwal.input-jadwal', [
             'sessionUser' => $request->session()->get('legacy_user'),
             'schedule' => new Schedule(),
             'days' => Day::query()->orderBy('idh')->get(),
@@ -80,7 +80,7 @@ class ScheduleCrudController extends Controller
 
     public function edit(Request $request, Schedule $schedule): View
     {
-        return view('crud.schedules.form', [
+        return view('crud.jadwal.input-jadwal', [
             'sessionUser' => $request->session()->get('legacy_user'),
             'schedule' => $schedule,
             'days' => Day::query()->orderBy('idh')->get(),

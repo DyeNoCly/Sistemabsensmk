@@ -12,7 +12,7 @@ class TeacherCrudController extends Controller
 {
     public function index(Request $request): View
     {
-        return view('crud.teachers.index', [
+        return view('crud.guru.data-guru', [
             'sessionUser' => $request->session()->get('legacy_user'),
             'teachers' => Teacher::query()->orderBy('nama')->paginate(20),
         ]);
@@ -20,7 +20,7 @@ class TeacherCrudController extends Controller
 
     public function create(Request $request): View
     {
-        return view('crud.teachers.form', [
+        return view('crud.guru.input-data', [
             'sessionUser' => $request->session()->get('legacy_user'),
             'teacher' => new Teacher(),
             'isEdit' => false,
@@ -47,7 +47,7 @@ class TeacherCrudController extends Controller
 
     public function edit(Request $request, Teacher $teacher): View
     {
-        return view('crud.teachers.form', [
+        return view('crud.guru.input-data', [
             'sessionUser' => $request->session()->get('legacy_user'),
             'teacher' => $teacher,
             'isEdit' => true,

@@ -42,7 +42,7 @@ class AttendanceCrudController extends Controller
             $query->where('status', $request->string('status'));
         }
 
-        return view('crud.attendance.index', [
+        return view('crud.absensi.data-absensi', [
             'sessionUser' => $request->session()->get('legacy_user'),
             'classes' => Kelas::query()->orderBy('nama')->get(),
             'students' => Student::query()->orderBy('nama')->get(),
@@ -74,7 +74,7 @@ class AttendanceCrudController extends Controller
             ->whereDate('tanggal', $date)
             ->pluck('status', 'nis');
 
-        return view('crud.attendance.roster', [
+        return view('crud.absensi.roster', [
             'sessionUser' => $request->session()->get('legacy_user'),
             'schedule' => $schedule,
             'students' => $students,
@@ -193,7 +193,7 @@ class AttendanceCrudController extends Controller
             'photo_path' => $request->string('photo_path')->toString(),
         ]);
 
-        return view('crud.attendance.form', [
+        return view('crud.absensi.input-absensi', [
             'sessionUser' => $request->session()->get('legacy_user'),
             'attendance' => $attendance,
             'students' => $students,
@@ -225,7 +225,7 @@ class AttendanceCrudController extends Controller
 
     public function edit(Request $request, Attendance $attendance): View
     {
-        return view('crud.attendance.form', [
+        return view('crud.absensi.input-absensi', [
             'sessionUser' => $request->session()->get('legacy_user'),
             'attendance' => $attendance,
             'students' => Student::query()->orderBy('nama')->get(),

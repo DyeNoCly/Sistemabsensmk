@@ -44,7 +44,7 @@ class AuthController extends Controller
         $request->session()->regenerate();
         $request->session()->put('legacy_user', $sessionUser);
 
-        return redirect()->intended(route('dashboard'));
+        return redirect()->route('dashboard');
     }
 
     public function logout(Request $request): RedirectResponse
@@ -68,7 +68,7 @@ class AuthController extends Controller
             'auth_type' => 'admin',
             'identifier' => (string) $user->idu,
             'nama' => (string) $user->nama,
-            'level' => (string) $user->level,
+            'level' => 'admin',
             'idk' => null,
             'id' => (int) $user->id,
             'ortu' => null,
@@ -102,7 +102,7 @@ class AuthController extends Controller
             'nama' => (string) $student->nama,
             'level' => 'user',
             'idk' => (int) ($student->idk ?? $student->kelas_id ?? 0),
-            'id' => 2,
+            'id' => (int) $student->ids,
             'ortu' => $expectedPassword,
         ];
     }
@@ -121,7 +121,7 @@ class AuthController extends Controller
             'nama' => (string) $teacher->nama,
             'level' => 'guru',
             'idk' => null,
-            'id' => 2,
+            'id' => (int) $teacher->idg,
             'ortu' => null,
         ];
     }

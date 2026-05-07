@@ -16,14 +16,6 @@
 
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label">Sekolah</label>
-                    <select name="id" class="form-select" required>
-                        @foreach($schools as $school)
-                            <option value="{{ $school->id }}" @selected((string) old('id', $classRecord->id) === (string) $school->id)>{{ $school->nama }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-6">
                     <label class="form-label">Nama Kelas</label>
                     <input type="text" name="nama" class="form-control" value="{{ old('nama', $classRecord->nama) }}" required>
                 </div>

@@ -12,7 +12,7 @@ class ClassCrudController extends Controller
 {
     public function index(Request $request): View
     {
-        return view('crud.classes.index', [
+        return view('crud.classes.data-kelas', [
             'sessionUser' => $request->session()->get('legacy_user'),
             'classes' => Kelas::query()->with('school')->orderBy('nama')->paginate(20),
         ]);
@@ -20,10 +20,11 @@ class ClassCrudController extends Controller
 
     public function create(Request $request): View
     {
-        return view('crud.classes.form', [
+        $defaultSchoolId = $this->defaultSchoolId();
+
+        return view('crud.classes.input-kelas', [
             'sessionUser' => $request->session()->get('legacy_user'),
-            'classRecord' => new Kelas(),
-            'schools' => School::query()->orderBy('nama')->get(),
+            'classRecord' => new Kelas(['id' => $defaultSchoolId]),
             'isEdit' => false,
         ]);
     }
@@ -31,9 +32,10 @@ class ClassCrudController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'id' => ['required', 'integer', 'exists:sekolah,id'],
             'nama' => ['required', 'string', 'max:50'],
         ]);
+
+        $data['id'] = $this->defaultSchoolId();
 
         Kelas::query()->create($data);
 
@@ -42,10 +44,9 @@ class ClassCrudController extends Controller
 
     public function edit(Request $request, Kelas $class): View
     {
-        return view('crud.classes.form', [
+        return view('crud.classes.input-kelas', [
             'sessionUser' => $request->session()->get('legacy_user'),
             'classRecord' => $class,
-            'schools' => School::query()->orderBy('nama')->get(),
             'isEdit' => true,
         ]);
     }
@@ -53,7 +54,6 @@ class ClassCrudController extends Controller
     public function update(Request $request, Kelas $class): RedirectResponse
     {
         $data = $request->validate([
-            'id' => ['required', 'integer', 'exists:sekolah,id'],
             'nama' => ['required', 'string', 'max:50'],
         ]);
 
@@ -67,5 +67,10 @@ class ClassCrudController extends Controller
         $class->delete();
 
         return redirect()->route('classes.index')->with('status', 'Kelas berhasil dihapus.');
+    }
+
+    private function defaultSchoolId(): int
+    {
+        return (int) (School::query()->orderBy('id')->value('id') ?? 0);
     }
 }

@@ -43,6 +43,8 @@
             </table>
         </div>
 
-        {{ $subjects->links() }}
+        @if(is_object($subjects) && method_exists($subjects, 'links'))
+            {{ $subjects->links() }}
+        @endif
     </div>
 @endsection

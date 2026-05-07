@@ -20,7 +20,7 @@ class StudentCrudController extends Controller
             $studentQuery->where('idk', $selectedClassId);
         }
 
-        return view('crud.students.index', [
+        return view('crud.siswa.data-siswa', [
             'sessionUser' => $request->session()->get('legacy_user'),
             'students' => $studentQuery->paginate(20)->appends($request->query()),
             'classes' => Kelas::query()->orderBy('nama')->get(),
@@ -30,7 +30,7 @@ class StudentCrudController extends Controller
 
     public function create(Request $request): View
     {
-        return view('crud.students.form', [
+        return view('crud.siswa.input-siswa', [
             'sessionUser' => $request->session()->get('legacy_user'),
             'student' => new Student(),
             'classes' => Kelas::query()->orderBy('nama')->get(),
@@ -55,7 +55,7 @@ class StudentCrudController extends Controller
 
     public function edit(Request $request, Student $student): View
     {
-        return view('crud.students.form', [
+        return view('crud.siswa.input-siswa', [
             'sessionUser' => $request->session()->get('legacy_user'),
             'student' => $student,
             'classes' => Kelas::query()->orderBy('nama')->get(),

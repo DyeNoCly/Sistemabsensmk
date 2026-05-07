@@ -11,7 +11,7 @@ class SubjectCrudController extends Controller
 {
     public function index(Request $request): View
     {
-        return view('crud.subjects.index', [
+        return view('crud.mata-pelajaran.data-matpel', [
             'sessionUser' => $request->session()->get('legacy_user'),
             'subjects' => Subject::query()->orderBy('nama_mp')->paginate(20),
         ]);
@@ -19,7 +19,7 @@ class SubjectCrudController extends Controller
 
     public function create(Request $request): View
     {
-        return view('crud.subjects.form', [
+        return view('crud.mata-pelajaran.input-matpel', [
             'sessionUser' => $request->session()->get('legacy_user'),
             'subject' => new Subject(),
             'isEdit' => false,
@@ -39,7 +39,7 @@ class SubjectCrudController extends Controller
 
     public function edit(Request $request, Subject $subject): View
     {
-        return view('crud.subjects.form', [
+        return view('crud.mata-pelajaran.input-matpel', [
             'sessionUser' => $request->session()->get('legacy_user'),
             'subject' => $subject,
             'isEdit' => true,

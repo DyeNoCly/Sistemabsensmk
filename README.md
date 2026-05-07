@@ -52,7 +52,7 @@ Sistem Absensi SMK adalah aplikasi web berbasis Laravel untuk mengelola absensi 
 1. Clone repository ini.
 2. Masuk ke direktori project:
    ```bash
-   cd /home/runner/work/Sistemabsensmk/Sistemabsensmk
+   cd Sistemabsensmk
    ```
 3. Jalankan setup otomatis:
    ```bash

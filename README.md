@@ -5,7 +5,7 @@ Sistem Absensi SMK adalah aplikasi web berbasis Laravel untuk mengelola absensi 
 ## Fitur Utama
 
 - Autentikasi multi-peran:
-  - Admin (berdasarkan tabel admin legacy)
+  - Admin (Username Admin dan Password Admin)
   - Guru (berdasarkan NIP)
   - Siswa (berdasarkan NIS, password 4 digit terakhir NISN)
 - Dashboard sesuai peran pengguna

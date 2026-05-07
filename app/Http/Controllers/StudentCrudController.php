@@ -6,7 +6,6 @@ use App\Models\Kelas;
 use App\Models\Student;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
 class StudentCrudController extends Controller
@@ -43,20 +42,11 @@ class StudentCrudController extends Controller
     {
         $data = $request->validate([
             'nis' => ['required', 'string', 'max:50', 'unique:siswa,nis'],
+            'nisn' => ['nullable', 'string', 'max:50'],
             'nama' => ['required', 'string', 'max:100'],
             'jk' => ['required', 'in:L,P'],
-            'alamat' => ['required', 'string'],
             'idk' => ['required', 'integer', 'exists:kelas,idk'],
-            'tlp' => ['nullable', 'string', 'max:20'],
-            'bapak' => ['nullable', 'string', 'max:50'],
-            'k_bapak' => ['nullable', 'string', 'max:50'],
-            'ibu' => ['nullable', 'string', 'max:50'],
-            'k_ibu' => ['nullable', 'string', 'max:50'],
-            'password' => ['required', 'string', 'min:4'],
         ]);
-
-        $data['pass'] = Hash::make($data['password']);
-        unset($data['password']);
 
         Student::query()->create($data);
 
@@ -77,22 +67,11 @@ class StudentCrudController extends Controller
     {
         $data = $request->validate([
             'nis' => ['required', 'string', 'max:50', 'unique:siswa,nis,' . $student->ids . ',ids'],
+            'nisn' => ['nullable', 'string', 'max:50'],
             'nama' => ['required', 'string', 'max:100'],
             'jk' => ['required', 'in:L,P'],
-            'alamat' => ['required', 'string'],
             'idk' => ['required', 'integer', 'exists:kelas,idk'],
-            'tlp' => ['nullable', 'string', 'max:20'],
-            'bapak' => ['nullable', 'string', 'max:50'],
-            'k_bapak' => ['nullable', 'string', 'max:50'],
-            'ibu' => ['nullable', 'string', 'max:50'],
-            'k_ibu' => ['nullable', 'string', 'max:50'],
-            'password' => ['nullable', 'string', 'min:4'],
         ]);
-
-        if (! empty($data['password'])) {
-            $data['pass'] = Hash::make($data['password']);
-        }
-        unset($data['password']);
 
         $student->update($data);
 

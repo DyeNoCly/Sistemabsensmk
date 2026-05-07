@@ -3,6 +3,13 @@
 @section('content')
     <div class="card p-3">
         <h4>{{ $isEdit ? 'Edit Absensi' : 'Tambah Absensi' }}</h4>
+        @php
+            $statusLabels = [
+                'H' => 'Hadir',
+                'I' => 'Izin',
+                'A' => 'Alpha',
+            ];
+        @endphp
 
         @if($errors->any())
             <div class="alert alert-danger py-2">{{ $errors->first() }}</div>
@@ -46,9 +53,9 @@
                 <div class="col-md-3">
                     <label class="form-label">Status</label>
                     <select name="status" class="form-select" required>
-                        <option value="H" @selected(old('status', $attendance->status) === 'H')>H</option>
-                        <option value="I" @selected(old('status', $attendance->status) === 'I')>I</option>
-                        <option value="A" @selected(old('status', $attendance->status) === 'A')>A</option>
+                        <option value="H" @selected(old('status', $attendance->status) === 'H')>Hadir</option>
+                        <option value="I" @selected(old('status', $attendance->status) === 'I')>Izin</option>
+                        <option value="A" @selected(old('status', $attendance->status) === 'A')>Alpha</option>
                     </select>
                 </div>
                 <div class="col-md-3">

@@ -30,11 +30,11 @@
                             <td>{{ $teacher->jk }}</td>
                             <td>{{ $teacher->alamat }}</td>
                             <td class="d-flex gap-1">
-                                <a href="{{ route('teachers.edit', $teacher) }}" class="btn btn-warning btn-sm">Edit</a>
+                                <a href="{{ route('teachers.edit', $teacher) }}" class="btn btn-primary btn-sm">Edit</a>
                                 <form method="post" action="{{ route('teachers.destroy', $teacher) }}" onsubmit="return confirm('Hapus data guru ini?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="btn btn-danger btn-sm">Hapus</button>
+                                    <button class="btn btn-primary btn-sm">Hapus</button>
                                 </form>
                             </td>
                         </tr>

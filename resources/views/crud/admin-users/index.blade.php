@@ -28,11 +28,11 @@
                             <td>{{ $user->level }}</td>
                             <td>{{ $user->id }}</td>
                             <td class="d-flex gap-1">
-                                <a href="{{ route('admin-users.edit', $user) }}" class="btn btn-warning btn-sm">Edit</a>
+                                <a href="{{ route('admin-users.edit', $user) }}" class="btn btn-primary btn-sm">Edit</a>
                                 <form method="post" action="{{ route('admin-users.destroy', $user) }}" onsubmit="return confirm('Hapus user ini?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="btn btn-danger btn-sm">Hapus</button>
+                                    <button class="btn btn-primary btn-sm">Hapus</button>
                                 </form>
                             </td>
                         </tr>

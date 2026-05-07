@@ -14,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -23,7 +24,7 @@ class DashboardController extends Controller
         $sessionUser = $request->session()->get('legacy_user', []);
         $role = (string) ($sessionUser['level'] ?? '');
 
-        return view('dashboard', [
+        return view('dashboard.index', [
             'sessionUser' => $sessionUser,
             'role' => $role,
             'stats' => [
@@ -115,6 +116,11 @@ class DashboardController extends Controller
             $photoPath = $this->storeAttendanceFile($request->file('photo'), 'attendance');
         }
 
+        $locationName = null;
+        if ($latitude !== null && $longitude !== null) {
+            $locationName = $this->reverseGeocodeCoordinates($latitude, $longitude);
+        }
+
         Attendance::query()->create([
             'nis' => $student->nis,
             'idm' => $schedule->idm,
@@ -122,6 +128,7 @@ class DashboardController extends Controller
             'status' => $status,
             'latitude' => $latitude,
             'longitude' => $longitude,
+            'location_name' => $locationName,
             'photo_path' => $photoPath,
         ]);
 
@@ -152,7 +159,7 @@ class DashboardController extends Controller
             $todaySchedules = $this->getTodaySchedulesForClass((int) $student->idk);
         }
 
-        return view('student-attendance', [
+        return view('student-attendance.index', [
             'sessionUser' => $sessionUser,
             'role' => 'user',
             'attendanceForm' => $attendanceForm,
@@ -176,7 +183,7 @@ class DashboardController extends Controller
             $todaySchedules = $this->getTodaySchedulesForClass((int) $student->idk);
         }
 
-        return view('student-schedule-today', [
+        return view('student-schedule-today.index', [
             'sessionUser' => $sessionUser,
             'role' => 'user',
             'student' => $student,
@@ -296,7 +303,7 @@ class DashboardController extends Controller
                     'label' => 'Kehadiran',
                     'value' => $attendanceRate . '%',
                     'delta' => 'Rata-rata hadir',
-                    'icon' => 'fa-line-chart',
+                    'icon' => 'fa-bar-chart-o',
                 ],
             ],
             'status' => [
@@ -510,10 +517,10 @@ class DashboardController extends Controller
             'headline' => 'Ringkasan Operasional Sekolah',
             'subhead' => 'Monitoring keseluruhan aktivitas absensi dan jadwal.',
             'cards' => [
-                ['label' => 'Total Siswa', 'value' => Student::count(), 'delta' => 'Siswa aktif', 'icon' => 'fa-users'],
-                ['label' => 'Total Guru', 'value' => Teacher::count(), 'delta' => 'Guru terdaftar', 'icon' => 'fa-user'],
-                ['label' => 'Total Jadwal', 'value' => Schedule::count(), 'delta' => 'Slot pembelajaran', 'icon' => 'fa-calendar'],
-                ['label' => 'Kehadiran', 'value' => $attendanceRate . '%', 'delta' => 'Rata-rata hadir', 'icon' => 'fa-line-chart'],
+                ['label' => 'Total Siswa', 'value' => Student::count(), 'delta' => 'Siswa aktif', 'icon' => 'fa-users', 'url' => route('students.index')],
+                ['label' => 'Total Guru', 'value' => Teacher::count(), 'delta' => 'Guru terdaftar', 'icon' => 'fa-user', 'url' => route('teachers.index')],
+                ['label' => 'Total Jadwal', 'value' => Schedule::count(), 'delta' => 'Slot pembelajaran', 'icon' => 'fa-calendar', 'url' => route('schedules.index')],
+                ['label' => 'Kehadiran', 'value' => $attendanceRate . '%', 'delta' => 'Rata-rata hadir', 'icon' => 'fa-bar-chart-o', 'url' => route('attendances.index')],
             ],
             'status' => ['Hadir' => $hadir, 'Izin' => $izin, 'Alpha' => $alpha],
             'trend' => $monthlyAttendance,
@@ -712,5 +719,39 @@ class DashboardController extends Controller
         file_put_contents($targetPath, $binary);
 
         return 'uploads/photos/' . $fileName;
+    }
+
+    private function reverseGeocodeCoordinates(float $latitude, float $longitude): ?string
+    {
+        try {
+            $response = Http::timeout(3)->get('https://nominatim.openstreetmap.org/reverse', [
+                'format' => 'jsonv2',
+                'lat' => $latitude,
+                'lon' => $longitude,
+                'zoom' => 18,
+                'addressdetails' => 1,
+            ]);
+
+            if (! $response->successful()) {
+                return null;
+            }
+
+            $data = $response->json();
+            if (isset($data['display_name'])) {
+                return $data['display_name'];
+            }
+
+            $address = $data['address'] ?? [];
+            $parts = array_filter([
+                $address['road'] ?? null,
+                $address['suburb'] ?? null,
+                $address['village'] ?? $address['town'] ?? $address['city'] ?? null,
+                $address['state'] ?? null,
+            ]);
+
+            return ! empty($parts) ? implode(', ', $parts) : null;
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }

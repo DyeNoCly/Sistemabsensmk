@@ -4,13 +4,18 @@
     <div class="card p-3">
         @php
             $proofBasePath = realpath(base_path('../uploads/photos'));
+            $statusLabels = [
+                'H' => 'Hadir',
+                'I' => 'Izin',
+                'A' => 'Alpha',
+            ];
         @endphp
 
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="mb-0">Data Absensi</h4>
             <div class="d-flex gap-2">
                 <a href="{{ route('attendances.create') }}" class="btn btn-primary btn-sm">Tambah Absensi</a>
-                <a href="{{ route('attendances.export', array_merge(request()->query(), ['export' => 1])) }}" class="btn btn-outline-success btn-sm">Export CSV</a>
+                <a href="{{ route('attendances.export', array_merge(request()->query(), ['export' => 1])) }}" download="absensi.csv" class="btn btn-outline-success btn-sm">Export CSV</a>
             </div>
         </div>
 
@@ -52,9 +57,9 @@
             <div class="col-md-1">
                 <select class="form-select" name="status">
                     <option value="">Status</option>
-                    <option value="H" @selected((string)($filters['status'] ?? '') === 'H')>H</option>
-                    <option value="I" @selected((string)($filters['status'] ?? '') === 'I')>I</option>
-                    <option value="A" @selected((string)($filters['status'] ?? '') === 'A')>A</option>
+                    <option value="H" @selected((string)($filters['status'] ?? '') === 'H')>Hadir</option>
+                    <option value="I" @selected((string)($filters['status'] ?? '') === 'I')>Izin</option>
+                    <option value="A" @selected((string)($filters['status'] ?? '') === 'A')>Alpha</option>
                 </select>
             </div>
             <div class="col-md-1 d-flex gap-2">
@@ -103,7 +108,7 @@
                             <td>{{ $attendance->student?->nama ?? '-' }}</td>
                             <td>{{ $attendance->student?->kelas?->nama ?? '-' }}</td>
                             <td>{{ $attendance->subject?->nama_mp ?? '-' }}</td>
-                            <td>{{ $attendance->status }}</td>
+                            <td>{{ $statusLabels[$attendance->status] ?? $attendance->status }}</td>
                             <td>
                                 @if($attendance->latitude && $attendance->longitude)
                                     <span class="js-location-name" data-lat="{{ $attendance->latitude }}" data-lng="{{ $attendance->longitude }}">Mencari nama lokasi...</span>
@@ -127,11 +132,11 @@
                                 @endif
                             </td>
                             <td class="d-flex gap-1">
-                                <a href="{{ route('attendances.edit', $attendance) }}" class="btn btn-warning btn-sm">Edit</a>
+                                <a href="{{ route('attendances.edit', $attendance) }}" class="btn btn-primary btn-sm">Edit</a>
                                 <form method="post" action="{{ route('attendances.destroy', $attendance) }}" onsubmit="return confirm('Hapus absensi ini?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="btn btn-danger btn-sm">Hapus</button>
+                                    <button class="btn btn-primary btn-sm">Hapus</button>
                                 </form>
                             </td>
                         </tr>

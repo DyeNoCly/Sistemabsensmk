@@ -14,16 +14,10 @@ class Student extends Model
 
     protected $fillable = [
         'nis',
+        'nisn',
         'nama',
         'jk',
-        'alamat',
         'idk',
-        'tlp',
-        'bapak',
-        'k_bapak',
-        'ibu',
-        'k_ibu',
-        'pass',
     ];
 
     public function kelas()

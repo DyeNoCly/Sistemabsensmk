@@ -149,9 +149,14 @@ class AttendanceCrudController extends Controller
 
         return response()->streamDownload(function () use ($rows): void {
             $handle = fopen('php://output', 'w');
-            fputcsv($handle, ['Tanggal', 'NIS', 'Siswa', 'Kelas', 'Mapel', 'Status', 'Latitude', 'Longitude', 'Photo']);
+            fputcsv($handle, ['Tanggal', 'NIS', 'Siswa', 'Kelas', 'Mapel', 'Status', 'Lokasi', 'Photo']);
 
             foreach ($rows as $row) {
+                $location = $row->location_name ?? '';
+                if (!$location && $row->latitude && $row->longitude) {
+                    $location = $row->latitude . ', ' . $row->longitude;
+                }
+
                 fputcsv($handle, [
                     optional($row->tanggal)->format('Y-m-d'),
                     $row->nis,
@@ -159,8 +164,7 @@ class AttendanceCrudController extends Controller
                     $row->student?->kelas?->nama,
                     $row->subject?->nama_mp,
                     $row->status,
-                    $row->latitude,
-                    $row->longitude,
+                    $location,
                     $row->photo_path,
                 ]);
             }

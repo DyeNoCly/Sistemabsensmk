@@ -28,11 +28,11 @@
                             <td>{{ $school->nama }}</td>
                             <td>{{ $school->alamat }}</td>
                             <td class="d-flex gap-1">
-                                <a href="{{ route('schools.edit', $school) }}" class="btn btn-warning btn-sm">Edit</a>
+                                <a href="{{ route('schools.edit', $school) }}" class="btn btn-primary btn-sm">Edit</a>
                                 <form method="post" action="{{ route('schools.destroy', $school) }}" onsubmit="return confirm('Hapus data sekolah ini?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="btn btn-danger btn-sm">Hapus</button>
+                                    <button class="btn btn-primary btn-sm">Hapus</button>
                                 </form>
                             </td>
                         </tr>

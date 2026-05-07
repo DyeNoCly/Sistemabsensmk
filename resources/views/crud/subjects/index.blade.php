@@ -26,11 +26,11 @@
                             <td>{{ $subject->idm }}</td>
                             <td>{{ $subject->nama_mp }}</td>
                             <td class="d-flex gap-1">
-                                <a href="{{ route('subjects.edit', $subject) }}" class="btn btn-warning btn-sm">Edit</a>
+                                <a href="{{ route('subjects.edit', $subject) }}" class="btn btn-primary btn-sm">Edit</a>
                                 <form method="post" action="{{ route('subjects.destroy', $subject) }}" onsubmit="return confirm('Hapus data mapel ini?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="btn btn-danger btn-sm">Hapus</button>
+                                    <button class="btn btn-primary btn-sm">Hapus</button>
                                 </form>
                             </td>
                         </tr>

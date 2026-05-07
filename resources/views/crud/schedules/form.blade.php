@@ -14,6 +14,11 @@
                 @method('PUT')
             @endif
 
+            @php
+                $jamMulai = old('jam_mulai', $schedule->jam_mulai ? substr((string) $schedule->jam_mulai, 0, 5) : '');
+                $jamSelesai = old('jam_selesai', $schedule->jam_selesai ? substr((string) $schedule->jam_selesai, 0, 5) : '');
+            @endphp
+
             <div class="row g-3">
                 <div class="col-md-3">
                     <label class="form-label">Hari</label>
@@ -49,11 +54,33 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Jam Mulai</label>
-                    <input type="time" name="jam_mulai" class="form-control" value="{{ old('jam_mulai', $schedule->jam_mulai) }}" required>
+                    <input
+                        type="text"
+                        name="jam_mulai"
+                        class="form-control"
+                        value="{{ $jamMulai }}"
+                        placeholder="08:00"
+                        maxlength="5"
+                        inputmode="numeric"
+                        pattern="^(?:[01]\d|2[0-3]):[0-5]\d$"
+                        title="Gunakan format 24 jam, contoh 08:00 atau 13:30"
+                        required
+                    >
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Jam Selesai</label>
-                    <input type="time" name="jam_selesai" class="form-control" value="{{ old('jam_selesai', $schedule->jam_selesai) }}" required>
+                    <input
+                        type="text"
+                        name="jam_selesai"
+                        class="form-control"
+                        value="{{ $jamSelesai }}"
+                        placeholder="17:00"
+                        maxlength="5"
+                        inputmode="numeric"
+                        pattern="^(?:[01]\d|2[0-3]):[0-5]\d$"
+                        title="Gunakan format 24 jam, contoh 08:00 atau 13:30"
+                        required
+                    >
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Aktif</label>
@@ -69,5 +96,26 @@
                 <a href="{{ route('schedules.index') }}" class="btn btn-secondary">Kembali</a>
             </div>
         </form>
+
+        <!-- Flatpickr 24-hour time picker -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                try {
+                    flatpickr("input[name='jam_mulai'], input[name='jam_selesai']", {
+                        enableTime: true,
+                        noCalendar: true,
+                        dateFormat: 'H:i',
+                        time_24hr: true,
+                        minuteIncrement: 5,
+                        allowInput: true
+                    });
+                } catch (e) {
+                    // If flatpickr fails to load, fallback to native/text validation (already present)
+                    console.warn('Flatpickr init failed', e);
+                }
+            });
+        </script>
     </div>
 @endsection

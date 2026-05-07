@@ -27,11 +27,11 @@
                         <tr>
                             <td>{{ $classItem->nama }}</td>
                             <td class="d-flex gap-1">
-                                <a href="{{ route('classes.edit', $classItem) }}" class="btn btn-warning btn-sm">Edit</a>
+                                <a href="{{ route('classes.edit', $classItem) }}" class="btn btn-primary btn-sm">Edit</a>
                                 <form method="post" action="{{ route('classes.destroy', $classItem) }}" onsubmit="return confirm('Hapus data kelas ini?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="btn btn-danger btn-sm">Hapus</button>
+                                    <button class="btn btn-primary btn-sm">Hapus</button>
                                 </form>
                             </td>
                         </tr>

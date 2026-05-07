@@ -15,11 +15,15 @@
             @endif
 
             <div class="row g-3">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="form-label">NIS</label>
                     <input type="text" name="nis" class="form-control" value="{{ old('nis', $student->nis) }}" required>
                 </div>
-                <div class="col-md-8">
+                <div class="col-md-3">
+                    <label class="form-label">NISN</label>
+                    <input type="text" name="nisn" class="form-control" value="{{ old('nisn', $student->nisn) }}">
+                </div>
+                <div class="col-md-6">
                     <label class="form-label">Nama</label>
                     <input type="text" name="nama" class="form-control" value="{{ old('nama', $student->nama) }}" required>
                 </div>
@@ -37,34 +41,6 @@
                             <option value="{{ $class->idk }}" @selected((string) old('idk', $student->idk) === (string) $class->idk)>{{ $class->nama }}</option>
                         @endforeach
                     </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Telepon</label>
-                    <input type="text" name="tlp" class="form-control" value="{{ old('tlp', $student->tlp) }}">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Nama Bapak</label>
-                    <input type="text" name="bapak" class="form-control" value="{{ old('bapak', $student->bapak) }}">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Pekerjaan Bapak</label>
-                    <input type="text" name="k_bapak" class="form-control" value="{{ old('k_bapak', $student->k_bapak) }}">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Nama Ibu</label>
-                    <input type="text" name="ibu" class="form-control" value="{{ old('ibu', $student->ibu) }}">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Pekerjaan Ibu</label>
-                    <input type="text" name="k_ibu" class="form-control" value="{{ old('k_ibu', $student->k_ibu) }}">
-                </div>
-                <div class="col-12">
-                    <label class="form-label">Alamat</label>
-                    <textarea name="alamat" class="form-control" rows="2" required>{{ old('alamat', $student->alamat) }}</textarea>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Password {{ $isEdit ? '(kosongkan jika tidak diubah)' : '' }}</label>
-                    <input type="password" name="password" class="form-control" {{ $isEdit ? '' : 'required' }}>
                 </div>
             </div>
 

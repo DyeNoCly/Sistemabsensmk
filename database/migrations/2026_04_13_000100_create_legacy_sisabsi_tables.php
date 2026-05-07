@@ -48,14 +48,7 @@ return new class extends Migration {
                 $table->string('nis', 50);
                 $table->string('nama', 100);
                 $table->string('jk', 2);
-                $table->text('alamat');
                 $table->integer('idk');
-                $table->string('tlp', 20);
-                $table->string('bapak', 50);
-                $table->string('k_bapak', 50);
-                $table->string('ibu', 50);
-                $table->string('k_ibu', 50);
-                $table->text('pass');
             });
         }
 

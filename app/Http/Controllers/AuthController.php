@@ -16,7 +16,7 @@ class AuthController extends Controller
     {
         $school = School::query()->find(2);
 
-        return view('auth.login', [
+        return view('login.index', [
             'schoolName' => $school?->nama ?? 'Sekolah',
         ]);
     }
@@ -77,9 +77,22 @@ class AuthController extends Controller
 
     private function authenticateStudent(string $username, string $password): ?array
     {
-        $student = Student::query()->where('nis', $username)->first();
+        $student = Student::query()
+            ->where('nis', $username)
+            ->first();
 
-        if (! $student || ! $this->isLegacyPasswordValid($password, (string) $student->pass)) {
+        if (! $student) {
+            return null;
+        }
+
+        $nisn = preg_replace('/\D+/', '', (string) ($student->nisn ?? ''));
+        if ($nisn === '') {
+            return null;
+        }
+
+        $expectedPassword = strlen($nisn) >= 4 ? substr($nisn, -4) : $nisn;
+
+        if (! hash_equals($expectedPassword, $password)) {
             return null;
         }
 
@@ -88,9 +101,9 @@ class AuthController extends Controller
             'identifier' => (string) $student->nis,
             'nama' => (string) $student->nama,
             'level' => 'user',
-            'idk' => (int) $student->idk,
+            'idk' => (int) ($student->idk ?? $student->kelas_id ?? 0),
             'id' => 2,
-            'ortu' => $password,
+            'ortu' => $expectedPassword,
         ];
     }
 

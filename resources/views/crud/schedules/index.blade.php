@@ -80,11 +80,11 @@
                             <td>{{ $schedule->jam_mulai }} - {{ $schedule->jam_selesai }}</td>
                             <td>{{ (int) $schedule->aktif === 1 ? 'Ya' : 'Tidak' }}</td>
                             <td class="d-flex gap-1">
-                                <a href="{{ route('schedules.edit', $schedule) }}" class="btn btn-warning btn-sm">Edit</a>
+                                <a href="{{ route('schedules.edit', $schedule) }}" class="btn btn-primary btn-sm">Edit</a>
                                 <form method="post" action="{{ route('schedules.destroy', $schedule) }}" onsubmit="return confirm('Hapus jadwal ini?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="btn btn-danger btn-sm">Hapus</button>
+                                    <button class="btn btn-primary btn-sm">Hapus</button>
                                 </form>
                             </td>
                         </tr>

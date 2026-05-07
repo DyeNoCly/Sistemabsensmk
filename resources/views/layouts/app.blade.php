@@ -11,7 +11,7 @@
         body {
             margin: 0;
             min-height: 100vh;
-            padding-top: 0;
+            padding-top: 72px;
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             color: #1f2a3d;
             background: linear-gradient(120deg, rgba(18, 42, 78, 0.78), rgba(15, 74, 118, 0.66));
@@ -44,7 +44,12 @@
             box-shadow: none;
             border-radius: 0;
             margin-left: 250px;
+            padding-top: 0;
             transition: margin-left 0.3s;
+        }
+
+        body.route-inner #page-wrapper .container-fluid {
+            padding-top: 18px;
         }
 
         .page-title {
@@ -199,15 +204,15 @@
             .dashboard-topbar .topbar-note {
                 display: none;
             }
+
+            body.route-inner #page-wrapper .container-fluid {
+                padding-top: 14px;
+            }
         }
 
         @media (min-width: 768px) {
             .navbar-static-side {
-                margin-top: 0;
-            }
-
-            .dashboard-topbar .navbar-static-side {
-                position: fixed;
+                position: fixed !important;
                 top: 72px;
                 left: 0;
                 bottom: 0;
@@ -215,6 +220,7 @@
                 overflow-y: auto;
                 overflow-x: hidden;
                 z-index: 1020;
+                margin-top: 0;
             }
 
             .sidebar-collapse {
@@ -236,20 +242,21 @@
 
             #page-wrapper {
                 margin-left: 250px;
-                padding-top: 72px;
+                padding-top: 0;
                 min-height: 100vh;
             }
         }
 
         @media (max-width: 767px) {
-            .dashboard-topbar .navbar-static-side {
-                position: fixed;
+            .navbar-static-side {
+                position: fixed !important;
                 top: 72px;
                 left: 0;
                 right: 0;
                 width: 100%;
                 max-height: calc(100vh - 72px);
                 overflow-y: auto;
+                overflow-x: hidden;
                 z-index: 1025;
             }
 
@@ -265,11 +272,11 @@
 
             #page-wrapper {
                 margin-left: 0;
-                padding-top: 72px;
+                padding-top: 0;
             }
         }
 
-        .dashboard-topbar .navbar-static-side {
+        .navbar-static-side {
             background: linear-gradient(180deg, rgba(17, 48, 90, 0.92), rgba(22, 102, 160, 0.9));
             border-right: 1px solid rgba(187, 224, 255, 0.35);
             box-shadow: 4px 0 18px rgba(6, 33, 58, 0.2);
@@ -374,9 +381,70 @@
         .pagination {
             margin-top: 15px;
         }
+
+        .user-display {
+            display: inline-flex !important;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-display .fa {
+            margin-top: 0;
+            line-height: 1;
+        }
+
+        .page-loading-overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            background: rgba(247, 249, 255, 0.88);
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.18s ease, visibility 0.18s ease;
+            z-index: 9999;
+        }
+
+        .page-loading-overlay.is-active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .page-loading-spinner {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 4px solid rgba(91, 56, 145, 0.18);
+            border-top-color: #5b3891;
+            animation: page-loading-spin 0.8s linear infinite;
+        }
+
+        .page-loading-text {
+            margin: 0;
+            color: #392751;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+        }
+
+        body.is-navigating {
+            cursor: progress;
+        }
+
+        @keyframes page-loading-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
-<body>
+<body class="{{ request()->routeIs('dashboard') ? 'route-dashboard' : 'route-inner' }}">
     @php
         $sessionUser = session('legacy_user', []);
         $role = $sessionUser['level'] ?? '';
@@ -402,9 +470,9 @@
 
             <ul class="nav navbar-top-links navbar-right">
                 <li>
-                    <a href="{{ route('dashboard') }}">
+                    <a href="{{ route('dashboard') }}" class="user-display">
                         <i class="fa fa-user fa-fw"></i>
-                        {{ $sessionUser['nama'] ?? '-' }} ({{ $role ?: '-' }})
+                        <span>{{ $sessionUser['nama'] ?? '-' }}</span>
                     </a>
                 </li>
                 <li>
@@ -419,7 +487,7 @@
         </nav>
 
         <div class="navbar-default navbar-static-side" role="navigation">
-            <div class="sidebar-collapse">
+            <div class="sidebar-collapse collapse">
                 <ul class="nav" id="side-menu">
                         <li>
                             <a href="{{ route('dashboard') }}"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
@@ -466,7 +534,6 @@
                     </ul>
                 </div>
             </div>
-        </nav>
 
         <div id="page-wrapper">
             <div class="container-fluid">
@@ -481,7 +548,115 @@
         </div>
     </div>
 
+    <div id="page-loading-overlay" class="page-loading-overlay" aria-hidden="true" role="status" aria-live="polite">
+        <div class="page-loading-spinner" aria-hidden="true"></div>
+        <p class="page-loading-text">Memuat halaman...</p>
+    </div>
+
     <script src="{{ asset('legacy/js/jquery-1.10.2.js') }}"></script>
     <script src="{{ asset('legacy/js/bootstrap.min.js') }}"></script>
+    <script>
+        (function () {
+            var overlay = document.getElementById('page-loading-overlay');
+            if (!overlay) {
+                return;
+            }
+
+            var body = document.body;
+            var loadingDelay = 250;
+            var loadingTimer = null;
+
+            function clearLoadingTimer() {
+                if (loadingTimer) {
+                    clearTimeout(loadingTimer);
+                    loadingTimer = null;
+                }
+            }
+
+            function showOverlay() {
+                overlay.classList.add('is-active');
+                overlay.setAttribute('aria-hidden', 'false');
+                body.classList.add('is-navigating');
+            }
+
+            function hideOverlay() {
+                clearLoadingTimer();
+                overlay.classList.remove('is-active');
+                overlay.setAttribute('aria-hidden', 'true');
+                body.classList.remove('is-navigating');
+            }
+
+            window.addEventListener('pageshow', hideOverlay);
+
+            document.addEventListener('click', function (event) {
+                if (event.defaultPrevented || event.button !== 0) {
+                    return;
+                }
+
+                if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                    return;
+                }
+
+                var link = event.target.closest('a');
+                if (!link) {
+                    return;
+                }
+
+                if (link.hasAttribute('download')) {
+                    return;
+                }
+
+                if (link.target && link.target !== '_self') {
+                    return;
+                }
+
+                var href = link.getAttribute('href') || '';
+                if (!href || href.charAt(0) === '#' || href.indexOf('javascript:') === 0) {
+                    return;
+                }
+
+                if (/^(mailto:|tel:|http:|https:|\/\/)/i.test(href)) {
+                    try {
+                        var destination = new URL(href, window.location.href);
+                        if (destination.origin !== window.location.origin) {
+                            return;
+                        }
+                    } catch (error) {
+                        return;
+                    }
+                }
+
+                var isSamePageAnchor = link.pathname === window.location.pathname && link.search === window.location.search && link.hash;
+                if (isSamePageAnchor) {
+                    return;
+                }
+
+                clearLoadingTimer();
+                loadingTimer = setTimeout(function () {
+                    showOverlay();
+                }, loadingDelay);
+            });
+
+            document.addEventListener('submit', function (event) {
+                var form = event.target;
+                if (!(form instanceof HTMLFormElement)) {
+                    return;
+                }
+
+                if (event.defaultPrevented) {
+                    return;
+                }
+
+                if (!form.checkValidity()) {
+                    return;
+                }
+
+                clearLoadingTimer();
+                loadingTimer = setTimeout(function () {
+                    showOverlay();
+                }, loadingDelay);
+            });
+        })();
+    </script>
 </body>
 </html>

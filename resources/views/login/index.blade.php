@@ -310,7 +310,7 @@
 	<header class="login-topbar">
 		<div class="topbar-brand">
 			<img src="{{ asset('images/school-logo-smk3hd.png') }}" alt="Logo sekolah">
-			<span>SMKN 3 Kota Tangerang Selatan</span>
+			<span>Sistem Absensi Sekolah</span>
 		</div>
 		<div class="topbar-note">Sistem Absensi</div>
 	</header>

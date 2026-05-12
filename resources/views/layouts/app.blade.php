@@ -525,7 +525,7 @@
 
                         @if($role === 'user')
                             <li>
-                                <a href="{{ route('student-schedule-today') }}"><i class="fa fa-calendar fa-fw"></i> Jadwal Hari Ini</a>
+                                <a href="{{ route('reports.student-recap') }}"><i class="fa fa-history fa-fw"></i> Riwayat</a>
                             </li>
                             <li>
                                 <a href="{{ route('student-attendance') }}"><i class="fa fa-check-square-o fa-fw"></i> Absensi</a>

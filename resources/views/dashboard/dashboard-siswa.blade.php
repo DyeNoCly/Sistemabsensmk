@@ -6,12 +6,18 @@
         $tableRows = $dashboard['tableRows'] ?? collect();
         $trend = $dashboard['trend'] ?? ['labels' => [], 'hadir' => [], 'izin' => [], 'alpha' => []];
 
-        $latestIndex = max(0, count($trend['labels']) - 1);
-        $monthHadir = (int) ($trend['hadir'][$latestIndex] ?? ($status['Hadir'] ?? 0));
-        $monthIzin = (int) ($trend['izin'][$latestIndex] ?? ($status['Izin'] ?? 0));
-        $monthAlpha = (int) ($trend['alpha'][$latestIndex] ?? ($status['Alpha'] ?? 0));
+        $latestIndex = !empty($trend['labels']) ? count($trend['labels']) - 1 : null;
+        $latestHadir = $latestIndex !== null ? (int) ($trend['hadir'][$latestIndex] ?? 0) : null;
+        $latestIzin = $latestIndex !== null ? (int) ($trend['izin'][$latestIndex] ?? 0) : null;
+        $latestAlpha = $latestIndex !== null ? (int) ($trend['alpha'][$latestIndex] ?? 0) : null;
+
+        $monthHadir = $latestHadir ?? (int) ($status['Hadir'] ?? 0);
+        $monthIzin = $latestIzin ?? (int) ($status['Izin'] ?? 0);
+        $monthAlpha = $latestAlpha ?? (int) ($status['Alpha'] ?? 0);
 
         $now = now();
+        $isSchoolHour = $now->isWeekday() && $now->hour >= 6 && $now->hour < 16;
+        $clockTagText = $isSchoolHour ? 'Di jam pelajaran' : 'Di luar jam pelajaran';
         $monthTitle = $now->translatedFormat('F Y');
         $startOffset = (int) $now->copy()->startOfMonth()->isoWeekday() - 1;
         $daysInMonth = (int) $now->daysInMonth;
@@ -33,7 +39,7 @@
         $statusMeta = [
             'H' => ['label' => 'Hadir', 'class' => 'std-pill-hadir'],
             'I' => ['label' => 'Izin', 'class' => 'std-pill-izin'],
-            'A' => ['label' => 'Alpa', 'class' => 'std-pill-alpa'],
+            'A' => ['label' => 'Alpha', 'class' => 'std-pill-alpha'],
         ];
     @endphp
 
@@ -285,7 +291,7 @@
 
         .std-pill-hadir { background: #e5f7df; color: #2f7f3d; }
         .std-pill-izin { background: #fff5d8; color: #896717; }
-        .std-pill-alpa { background: #fde9ea; color: #a84756; }
+        .std-pill-alpha { background: #fde9ea; color: #a84756; }
 
         .std-actions {
             display: flex;
@@ -340,7 +346,7 @@
             <div class="std-card std-clock">
                 <p class="std-time"><span id="std-hour-minute">{{ $now->format('H:i') }}</span><span class="std-seconds" id="std-seconds">:{{ $now->format('s') }}</span></p>
                 <p class="std-date" id="std-full-date">{{ $now->translatedFormat('l, d F Y') }}</p>
-                <span class="std-tag"><i class="fa fa-check-square-o"></i> Di luar jam pelajaran</span>
+                <span class="std-tag"><i class="fa fa-check-square-o"></i> {{ $clockTagText }}</span>
             </div>
 
             <div class="std-card">
@@ -371,7 +377,7 @@
                 <p class="std-mini-foot">Bulan ini</p>
             </div>
             <div class="std-card">
-                <p class="std-mini-title">Alpa</p>
+                <p class="std-mini-title">Alpha</p>
                 <p class="std-mini-value">{{ $monthAlpha }}</p>
                 <p class="std-mini-foot">Bulan ini</p>
             </div>
@@ -391,7 +397,7 @@
             @forelse($tableRows as $row)
                 @php
                     $statusCode = strtoupper((string) ($row->status ?? ''));
-                    $meta = $statusMeta[$statusCode] ?? ['label' => '-', 'class' => 'std-pill-alpa'];
+                    $meta = $statusMeta[$statusCode] ?? ['label' => '-', 'class' => 'std-pill-alpha'];
                 @endphp
                 <div class="std-item">
                     <div>
@@ -414,6 +420,7 @@
 
     <script>
         (function () {
+            'use strict';
             var hm = document.getElementById('std-hour-minute');
             var sec = document.getElementById('std-seconds');
             var full = document.getElementById('std-full-date');

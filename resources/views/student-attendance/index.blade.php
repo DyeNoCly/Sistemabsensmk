@@ -109,7 +109,7 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
         }
 
@@ -268,10 +268,10 @@
                 <p class="attendance-subtitle">Isi absensi pada jadwal yang sedang aktif.</p>
             </div>
             <div class="attendance-actions">
-                <a href="{{ route('reports.student-recap') }}" class="btn btn-default btn-sm">
+                <a href="{{ route('reports.student-recap') }}" class="btn btn-default btn-sm" aria-label="Lihat riwayat absensi">
                     <i class="fa fa-history"></i> Riwayat
                 </a>
-                <a href="{{ route('dashboard') }}" class="btn btn-primary btn-sm">
+                <a href="{{ route('dashboard') }}" class="btn btn-primary btn-sm" aria-label="Kembali ke dashboard">
                     <i class="fa fa-dashboard"></i> Dashboard
                 </a>
             </div>

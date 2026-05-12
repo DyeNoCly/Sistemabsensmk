@@ -339,7 +339,7 @@
 
         <div class="std-actions">
             <a href="{{ route('student-attendance') }}" class="btn btn-success btn-sm"><i class="fa fa-check-square-o"></i> Absensi</a>
-            <a href="{{ route('student-schedule-today') }}" class="btn btn-default btn-sm"><i class="fa fa-calendar"></i> Jadwal Hari Ini</a>
+            <a href="{{ route('reports.student-recap') }}" class="btn btn-default btn-sm"><i class="fa fa-history"></i> Riwayat</a>
         </div>
 
         <div class="std-grid" style="margin-top: 10px;">

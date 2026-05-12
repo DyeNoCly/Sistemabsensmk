@@ -105,6 +105,20 @@
             font-size: 14px;
         }
 
+        .attendance-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .attendance-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
         .attendance-grid {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -232,6 +246,14 @@
                 grid-template-columns: 1fr;
             }
 
+            .attendance-actions {
+                width: 100%;
+            }
+
+            .attendance-actions .btn {
+                flex: 1 1 100%;
+            }
+
             .camera-actions .btn,
             .submit-btn {
                 width: 100%;
@@ -240,8 +262,20 @@
     </style>
 
     <div class="attendance-shell">
-        <h3 class="attendance-title">Absensi Siswa</h3>
-        <p class="attendance-subtitle">Isi absensi pada jadwal yang sedang aktif.</p>
+        <div class="attendance-header">
+            <div>
+                <h3 class="attendance-title">Absensi Siswa</h3>
+                <p class="attendance-subtitle">Halaman absensi siswa dengan tampilan terbaru.</p>
+            </div>
+            <div class="attendance-actions">
+                <a href="{{ route('reports.student-recap') }}" class="btn btn-default btn-sm">
+                    <i class="fa fa-history"></i> Riwayat
+                </a>
+                <a href="{{ route('dashboard') }}" class="btn btn-primary btn-sm">
+                    <i class="fa fa-dashboard"></i> Dashboard
+                </a>
+            </div>
+        </div>
 
         @if(session('dashboard_error'))
             <div class="alert alert-danger" style="margin-top: 12px;">{{ session('dashboard_error') }}</div>
@@ -276,7 +310,7 @@
 
         @if(count($todaySchedules) > 0)
             <div id="jadwal-hari-ini" style="margin-top: 16px; padding: 12px; background: #f0f6ff; border: 1px solid #c8dcff; border-radius: 10px;">
-                <p style="margin: 0 0 10px; font-size: 13px; color: #4a6b9a; font-weight: 600;">Jadwal Pelajaran Hari Ini:</p>
+                <p style="margin: 0 0 10px; font-size: 13px; color: #4a6b9a; font-weight: 600;">Ringkasan Jadwal Hari Ini:</p>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px;">
                     @foreach($todaySchedules as $sched)
                         <div style="background: #fff; border: 1px solid #dce8ff; border-radius: 8px; padding: 10px; font-size: 12px;">

@@ -1,457 +1,442 @@
 @extends('layouts.app')
 
 @section('content')
-	@php
-		$cards = $dashboard['cards'] ?? [];
-		$status = $dashboard['status'] ?? ['Hadir' => 0, 'Izin' => 0, 'Alpha' => 0];
-		$trend = $dashboard['trend'] ?? ['labels' => [], 'hadir' => [], 'izin' => [], 'alpha' => []];
-		$performance = $dashboard['performance'] ?? collect();
-		$tableRows = $dashboard['tableRows'] ?? collect();
-		$totalStatus = array_sum($status);
-		$pctHadir = $totalStatus > 0 ? round(($status['Hadir'] / $totalStatus) * 100) : 0;
-		$pctIzin = $totalStatus > 0 ? round(($status['Izin'] / $totalStatus) * 100) : 0;
-		$pctAlpha = max(0, 100 - $pctHadir - $pctIzin);
+    @php
+        $status = $dashboard['status'] ?? ['Hadir' => 0, 'Izin' => 0, 'Alpha' => 0];
+        $tableRows = $dashboard['tableRows'] ?? collect();
+        $trend = $dashboard['trend'] ?? ['labels' => [], 'hadir' => [], 'izin' => [], 'alpha' => []];
 
-		$allSeries = array_merge($trend['hadir'] ?? [], $trend['izin'] ?? [], $trend['alpha'] ?? []);
-		$maxSeries = !empty($allSeries) ? max($allSeries) : 0;
-		$maxSeries = $maxSeries > 0 ? $maxSeries : 1;
-	@endphp
+        $latestIndex = max(0, count($trend['labels']) - 1);
+        $monthHadir = (int) ($trend['hadir'][$latestIndex] ?? ($status['Hadir'] ?? 0));
+        $monthIzin = (int) ($trend['izin'][$latestIndex] ?? ($status['Izin'] ?? 0));
+        $monthAlpha = (int) ($trend['alpha'][$latestIndex] ?? ($status['Alpha'] ?? 0));
 
-	<style>
-		.student-shell {
-			background: radial-gradient(circle at top left, #eef7ff 0%, #fbfdff 45%, #f6fbf8 100%);
-			border: 3px solid #21455a;
-			border-radius: 24px;
-			padding: 24px;
-			margin: 20px 0;
-			box-shadow: 0 16px 34px rgba(20, 45, 60, 0.12);
-		}
+        $now = now();
+        $monthTitle = $now->translatedFormat('F Y');
+        $startOffset = (int) $now->copy()->startOfMonth()->isoWeekday() - 1;
+        $daysInMonth = (int) $now->daysInMonth;
+        $todayDate = (int) $now->day;
 
-		.student-headline {
-			margin: 0;
-			font-size: 30px;
-			color: #143244;
-			font-weight: 700;
-			letter-spacing: 0.2px;
-		}
+        $calendarCells = [];
+        for ($i = 0; $i < $startOffset; $i++) {
+            $calendarCells[] = null;
+        }
 
-		.student-subhead {
-			margin-top: 6px;
-			color: #64798a;
-			font-size: 14px;
-		}
+        for ($day = 1; $day <= $daysInMonth; $day++) {
+            $calendarCells[] = $day;
+        }
 
-		.student-actions {
-			display: flex;
-			gap: 10px;
-			flex-wrap: wrap;
-			margin-top: 14px;
-		}
+        while (count($calendarCells) % 7 !== 0) {
+            $calendarCells[] = null;
+        }
 
-		.student-card-grid {
-			margin-top: 20px;
-			display: grid;
-			grid-template-columns: repeat(4, minmax(170px, 1fr));
-			gap: 14px;
-		}
+        $statusMeta = [
+            'H' => ['label' => 'Hadir', 'class' => 'std-pill-hadir'],
+            'I' => ['label' => 'Izin', 'class' => 'std-pill-izin'],
+            'A' => ['label' => 'Alpa', 'class' => 'std-pill-alpa'],
+        ];
+    @endphp
 
-		.student-stat {
-			background: linear-gradient(160deg, #ffffff 0%, #eef8ff 100%);
-			border: 1px solid #d9e6ef;
-			border-radius: 14px;
-			padding: 14px;
-			min-height: 108px;
-			position: relative;
-			overflow: hidden;
-		}
+    <style>
+        .std-wrap {
+            margin: 18px 0;
+            background: #f4f6f3;
+            border: 1px solid #d7ddd4;
+            border-radius: 16px;
+            box-shadow: 0 12px 28px rgba(23, 42, 27, 0.14);
+            padding: 14px;
+        }
 
-		.student-stat-top {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-		}
+        .std-grid {
+            display: grid;
+            grid-template-columns: 1.2fr .9fr;
+            gap: 12px;
+        }
 
-		.student-stat-label {
-			margin: 0;
-			color: #708092;
-			font-size: 12px;
-			text-transform: uppercase;
-			letter-spacing: 0.5px;
-		}
+        .std-card {
+            background: #ffffff;
+            border: 1px solid #dbe2d8;
+            border-radius: 12px;
+            padding: 12px;
+        }
 
-		.student-stat-icon {
-			width: 30px;
-			height: 30px;
-			border-radius: 8px;
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			color: #18506a;
-			background: #dff2ff;
-		}
+        .std-profile {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
 
-		.student-stat-value {
-			margin: 8px 0 0;
-			font-size: 30px;
-			line-height: 1;
-			color: #123244;
-			font-weight: 700;
-		}
+        .std-profile-main {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-		.student-stat-foot {
-			margin: 7px 0 0;
-			color: #7a8a97;
-			font-size: 12px;
-		}
+        .std-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #98c25f;
+            color: #2a4a19;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
 
-		.student-main-grid {
-			margin-top: 16px;
-			display: grid;
-			grid-template-columns: 1.4fr 0.9fr;
-			gap: 14px;
-		}
+        .std-name {
+            margin: 0;
+            font-size: 17px;
+            font-weight: 700;
+            color: #1d2f1f;
+        }
 
-		.student-panel {
-			background: #fff;
-			border: 1px solid #dce8ef;
-			border-radius: 16px;
-			padding: 16px;
-			min-height: 250px;
-		}
+        .std-sub {
+            margin: 2px 0 0;
+            font-size: 12px;
+            color: #5d6d5e;
+        }
 
-		.student-panel-title {
-			margin: 0 0 14px;
-			color: #143244;
-			font-weight: 700;
-			font-size: 19px;
-		}
+        .std-active {
+            border-radius: 999px;
+            padding: 4px 10px;
+            background: #ebf6d9;
+            color: #44632f;
+            font-weight: 700;
+            font-size: 11px;
+            white-space: nowrap;
+        }
 
-		.student-bars {
-			display: grid;
-			grid-template-columns: repeat(5, minmax(64px, 1fr));
-			gap: 12px;
-			align-items: end;
-			min-height: 200px;
-			padding-top: 8px;
-		}
+        .std-clock {
+            background: #196f33;
+            color: #fff;
+            border: 0;
+            min-height: 198px;
+        }
 
-		.student-bar-wrap {
-			text-align: center;
-		}
+        .std-time {
+            margin: 0;
+            font-size: 44px;
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: .6px;
+        }
 
-		.student-bar-stack {
-			display: flex;
-			align-items: flex-end;
-			justify-content: center;
-			gap: 3px;
-			min-height: 156px;
-			margin-bottom: 8px;
-		}
+        .std-seconds {
+            font-size: 20px;
+            opacity: .86;
+        }
 
-		.student-bar {
-			width: 14px;
-			border-radius: 6px;
-			transition: height .4s ease;
-		}
+        .std-date {
+            margin: 8px 0 10px;
+            font-size: 13px;
+            color: #d3efd8;
+        }
 
-		.student-bar.hadir { background: #1477a3; }
-		.student-bar.izin { background: #69a7c7; }
-		.student-bar.alpha { background: #c6ddeb; }
+        .std-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 7px;
+            background: rgba(255, 255, 255, .14);
+            padding: 5px 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
 
-		.student-month {
-			font-size: 12px;
-			color: #6a7e8f;
-		}
+        .std-calendar-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
 
-		.student-legend {
-			display: flex;
-			gap: 14px;
-			margin-top: 8px;
-			flex-wrap: wrap;
-		}
+        .std-calendar-title {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 700;
+            color: #2f4230;
+            text-transform: capitalize;
+        }
 
-		.student-legend-item {
-			display: inline-flex;
-			align-items: center;
-			gap: 6px;
-			color: #607382;
-			font-size: 12px;
-		}
+        .std-week,
+        .std-days {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 4px;
+        }
 
-		.student-dot {
-			width: 10px;
-			height: 10px;
-			border-radius: 50%;
-		}
+        .std-week span {
+            font-size: 10px;
+            text-align: center;
+            color: #6f7e70;
+            font-weight: 700;
+            padding: 3px 0;
+        }
 
-		.student-ring-box {
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			margin: 10px 0 14px;
-		}
+        .std-day {
+            border-radius: 7px;
+            min-height: 23px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4a594b;
+            background: #f3f7f2;
+        }
 
-		.student-ring {
-			width: 156px;
-			height: 156px;
-			border-radius: 50%;
-			background: conic-gradient(
-				#1477a3 0% {{ $pctHadir }}%,
-				#69a7c7 {{ $pctHadir }}% {{ $pctHadir + $pctIzin }}%,
-				#c6ddeb {{ $pctHadir + $pctIzin }}% 100%
-			);
-			position: relative;
-			box-shadow: inset 0 0 0 8px #ffffff;
-		}
+        .std-day.empty {
+            background: transparent;
+        }
 
-		.student-ring::after {
-			content: '{{ $totalStatus }}';
-			width: 96px;
-			height: 96px;
-			border-radius: 50%;
-			background: #fff;
-			position: absolute;
-			left: 50%;
-			top: 50%;
-			transform: translate(-50%, -50%);
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			color: #123244;
-			font-weight: 700;
-			font-size: 28px;
-		}
+        .std-day.today {
+            background: #196f33;
+            color: #fff;
+            font-weight: 700;
+        }
 
-		.student-status-row {
-			display: flex;
-			justify-content: space-between;
-			font-size: 13px;
-			padding: 4px 0;
-			color: #547082;
-		}
+        .std-mini-grid {
+            margin-top: 10px;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
 
-		.student-lower {
-			margin-top: 14px;
-			display: grid;
-			grid-template-columns: 1fr 1.4fr;
-			gap: 14px;
-		}
+        .std-mini-title {
+            margin: 0;
+            font-size: 12px;
+            color: #6b7b6b;
+        }
 
-		.student-perf-item {
-			margin-bottom: 12px;
-		}
+        .std-mini-value {
+            margin: 4px 0 0;
+            font-size: 31px;
+            line-height: 1;
+            color: #253425;
+            font-weight: 700;
+        }
 
-		.student-perf-label {
-			display: flex;
-			justify-content: space-between;
-			color: #4e6676;
-			font-size: 13px;
-			margin-bottom: 6px;
-		}
+        .std-mini-foot {
+            margin: 3px 0 0;
+            font-size: 11px;
+            color: #7b887b;
+        }
 
-		.student-perf-track {
-			width: 100%;
-			height: 8px;
-			border-radius: 6px;
-			background: #e7f0f5;
-			overflow: hidden;
-		}
+        .std-list-head {
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-		.student-perf-fill {
-			height: 100%;
-			border-radius: 6px;
-			background: linear-gradient(90deg, #1477a3 0%, #69a7c7 100%);
-		}
+        .std-list-title {
+            margin: 0;
+            font-size: 17px;
+            color: #1f2f20;
+            font-weight: 700;
+        }
 
-		.student-table {
-			width: 100%;
-			border-collapse: collapse;
-			font-size: 13px;
-		}
+        .std-link {
+            color: #2e6f3f;
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: none;
+        }
 
-		.student-table th,
-		.student-table td {
-			padding: 8px 10px;
-			border-bottom: 1px solid #e9f0f4;
-			color: #445965;
-		}
+        .std-items {
+            margin-top: 8px;
+            display: grid;
+            gap: 8px;
+        }
 
-		.student-table th {
-			font-size: 12px;
-			text-transform: uppercase;
-			color: #7d919f;
-		}
+        .std-item {
+            background: #fff;
+            border: 1px solid #dce4da;
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
 
-		.student-pill {
-			border-radius: 999px;
-			padding: 2px 8px;
-			font-size: 11px;
-			font-weight: 700;
-			display: inline-block;
-			min-width: 32px;
-			text-align: center;
-		}
+        .std-item-date {
+            margin: 0;
+            font-weight: 700;
+            color: #2b3a2c;
+            font-size: 13px;
+        }
 
-		.student-pill-h { background: #dff2ff; color: #13546f; }
-		.student-pill-i { background: #eaf6fb; color: #2f6f8c; }
-		.student-pill-a { background: #eef7fb; color: #6d8a99; }
+        .std-item-sub {
+            margin: 2px 0 0;
+            color: #6a796b;
+            font-size: 12px;
+        }
 
-		@media (max-width: 1200px) {
-			.student-card-grid { grid-template-columns: repeat(2, minmax(170px, 1fr)); }
-			.student-main-grid { grid-template-columns: 1fr; }
-			.student-lower { grid-template-columns: 1fr; }
-		}
+        .std-pill {
+            border-radius: 999px;
+            padding: 5px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
 
-		@media (max-width: 767px) {
-			.student-shell {
-				border-width: 2px;
-				border-radius: 16px;
-				padding: 14px;
-			}
+        .std-pill-hadir { background: #e5f7df; color: #2f7f3d; }
+        .std-pill-izin { background: #fff5d8; color: #896717; }
+        .std-pill-alpa { background: #fde9ea; color: #a84756; }
 
-			.student-headline { font-size: 24px; }
-			.student-card-grid { grid-template-columns: 1fr; }
-			.student-bars { grid-template-columns: repeat(5, minmax(44px, 1fr)); gap: 8px; }
-			.student-bar { width: 10px; }
-		}
-	</style>
+        .std-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
 
-	<div class="student-shell">
-		<h3 class="student-headline">Hi, {{ $sessionUser['nama'] ?? 'Siswa' }}</h3>
-		<p class="student-subhead">{{ $dashboard['headline'] ?? 'Dashboard Siswa' }}. {{ $dashboard['subhead'] ?? '' }}</p>
+        @media (max-width: 992px) {
+            .std-grid { grid-template-columns: 1fr; }
+        }
 
-		<div class="student-actions">
-			<a href="{{ route('student-attendance') }}" class="btn btn-primary btn-sm">
-				<i class="fa fa-check-square-o"></i> Buka Absensi
-			</a>
-			<a href="{{ route('student-schedule-today') }}" class="btn btn-info btn-sm">
-				<i class="fa fa-calendar"></i> Jadwal Hari Ini
-			</a>
-		</div>
+        @media (max-width: 767px) {
+            .std-mini-grid { grid-template-columns: 1fr; }
+            .std-time { font-size: 36px; }
+            .std-wrap { padding: 10px; border-radius: 12px; }
+        }
+    </style>
 
-		@if(session('dashboard_error'))
-			<div class="alert alert-danger" style="margin-top: 12px;">{{ session('dashboard_error') }}</div>
-		@endif
+    <div class="std-wrap">
+        @if(session('dashboard_error'))
+            <div class="alert alert-danger" style="margin-bottom: 10px;">{{ session('dashboard_error') }}</div>
+        @endif
 
-		@if($errors->any())
-			<div class="alert alert-danger" style="margin-top: 12px;">
-				<ul style="margin: 0; padding-left: 20px;">
-					@foreach($errors->all() as $error)
-						<li>{{ $error }}</li>
-					@endforeach
-				</ul>
-			</div>
-		@endif
+        @if($errors->any())
+            <div class="alert alert-danger" style="margin-bottom: 10px;">
+                <ul style="margin: 0; padding-left: 20px;">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
-		<div class="student-card-grid">
-			@foreach($cards as $card)
-				<div class="student-stat">
-					<div class="student-stat-top">
-						<p class="student-stat-label">{{ $card['label'] }}</p>
-						<span class="student-stat-icon"><i class="fa {{ $card['icon'] }}"></i></span>
-					</div>
-					<p class="student-stat-value">{{ $card['value'] }}</p>
-					<p class="student-stat-foot">{{ $card['delta'] }}</p>
-				</div>
-			@endforeach
-		</div>
+        <div class="std-card std-profile">
+            <div class="std-profile-main">
+                <span class="std-avatar">{{ strtoupper(substr((string) ($sessionUser['nama'] ?? 'S'), 0, 2)) }}</span>
+                <div>
+                    <p class="std-name">{{ $sessionUser['nama'] ?? 'Siswa' }}</p>
+                    <p class="std-sub">NIS {{ $sessionUser['identifier'] ?? '-' }} • Dashboard Siswa</p>
+                </div>
+            </div>
+            <span class="std-active"><i class="fa fa-circle" style="font-size:8px;"></i> Aktif</span>
+        </div>
 
-		<div class="student-main-grid">
-			<div class="student-panel">
-				<h4 class="student-panel-title">Tren Kehadiran 5 Bulan</h4>
+        <div class="std-actions">
+            <a href="{{ route('student-attendance') }}" class="btn btn-success btn-sm"><i class="fa fa-check-square-o"></i> Absensi</a>
+            <a href="{{ route('student-schedule-today') }}" class="btn btn-default btn-sm"><i class="fa fa-calendar"></i> Jadwal Hari Ini</a>
+        </div>
 
-				<div class="student-bars">
-					@foreach($trend['labels'] as $idx => $label)
-						@php
-							$h = (int) ($trend['hadir'][$idx] ?? 0);
-							$i = (int) ($trend['izin'][$idx] ?? 0);
-							$a = (int) ($trend['alpha'][$idx] ?? 0);
-						@endphp
-						<div class="student-bar-wrap">
-							<div class="student-bar-stack">
-								<div class="student-bar hadir" style="height: {{ max(6, (int) round(($h / $maxSeries) * 140)) }}px" title="Hadir: {{ $h }}"></div>
-								<div class="student-bar izin" style="height: {{ max(6, (int) round(($i / $maxSeries) * 140)) }}px" title="Izin: {{ $i }}"></div>
-								<div class="student-bar alpha" style="height: {{ max(6, (int) round(($a / $maxSeries) * 140)) }}px" title="Alpha: {{ $a }}"></div>
-							</div>
-							<div class="student-month">{{ $label }}</div>
-						</div>
-					@endforeach
-				</div>
+        <div class="std-grid" style="margin-top: 10px;">
+            <div class="std-card std-clock">
+                <p class="std-time"><span id="std-hour-minute">{{ $now->format('H:i') }}</span><span class="std-seconds" id="std-seconds">:{{ $now->format('s') }}</span></p>
+                <p class="std-date" id="std-full-date">{{ $now->translatedFormat('l, d F Y') }}</p>
+                <span class="std-tag"><i class="fa fa-check-square-o"></i> Di luar jam pelajaran</span>
+            </div>
 
-				<div class="student-legend">
-					<span class="student-legend-item"><span class="student-dot" style="background:#1477a3;"></span>Hadir</span>
-					<span class="student-legend-item"><span class="student-dot" style="background:#69a7c7;"></span>Izin</span>
-					<span class="student-legend-item"><span class="student-dot" style="background:#c6ddeb;"></span>Alpha</span>
-				</div>
-			</div>
+            <div class="std-card">
+                <div class="std-calendar-head">
+                    <p class="std-calendar-title">{{ $monthTitle }}</p>
+                    <span class="text-muted" style="font-size: 11px;"><i class="fa fa-calendar"></i></span>
+                </div>
 
-			<div class="student-panel">
-				<h4 class="student-panel-title">Komposisi Status</h4>
-				<div class="student-ring-box">
-					<div class="student-ring"></div>
-				</div>
-				<div class="student-status-row"><span>Hadir</span><strong>{{ $status['Hadir'] ?? 0 }} ({{ $pctHadir }}%)</strong></div>
-				<div class="student-status-row"><span>Izin</span><strong>{{ $status['Izin'] ?? 0 }} ({{ $pctIzin }}%)</strong></div>
-				<div class="student-status-row"><span>Alpha</span><strong>{{ $status['Alpha'] ?? 0 }} ({{ $pctAlpha }}%)</strong></div>
-			</div>
-		</div>
+                <div class="std-week">
+                    <span>S</span><span>S</span><span>R</span><span>K</span><span>J</span><span>S</span><span>M</span>
+                </div>
+                <div class="std-days">
+                    @foreach($calendarCells as $cell)
+                        @if($cell === null)
+                            <span class="std-day empty"></span>
+                        @else
+                            <span class="std-day {{ $cell === $todayDate ? 'today' : '' }}">{{ $cell }}</span>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+        </div>
 
-		<div class="student-lower">
-			<div class="student-panel">
-				<h4 class="student-panel-title">Distribusi Mapel Anda</h4>
+        <div class="std-mini-grid">
+            <div class="std-card">
+                <p class="std-mini-title">Hadir</p>
+                <p class="std-mini-value">{{ $monthHadir }}</p>
+                <p class="std-mini-foot">Bulan ini</p>
+            </div>
+            <div class="std-card">
+                <p class="std-mini-title">Alpa</p>
+                <p class="std-mini-value">{{ $monthAlpha }}</p>
+                <p class="std-mini-foot">Bulan ini</p>
+            </div>
+            <div class="std-card">
+                <p class="std-mini-title">Izin</p>
+                <p class="std-mini-value">{{ $monthIzin }}</p>
+                <p class="std-mini-foot">Bulan ini</p>
+            </div>
+        </div>
 
-				@forelse($performance as $row)
-					@php
-						$denominator = (int) ($row['total'] ?? 0);
-						$numerator = (int) ($row['hadir'] ?? 0);
-						$percent = $totalStatus > 0 ? (int) round(($numerator / $totalStatus) * 100) : 0;
-					@endphp
-					<div class="student-perf-item">
-						<div class="student-perf-label">
-							<span>{{ $row['label'] }}</span>
-							<span>{{ $numerator }} data</span>
-						</div>
-						<div class="student-perf-track">
-							<div class="student-perf-fill" style="width: {{ max(4, $percent) }}%"></div>
-						</div>
-					</div>
-				@empty
-					<p class="text-muted" style="margin-top: 4px;">Belum ada data performa.</p>
-				@endforelse
-			</div>
+        <div class="std-list-head">
+            <h4 class="std-list-title">Absensi terbaru</h4>
+            <a class="std-link" href="{{ route('student-attendance') }}">Lihat semua</a>
+        </div>
 
-			<div class="student-panel">
-				<h4 class="student-panel-title">Riwayat Absensi Terbaru</h4>
+        <div class="std-items">
+            @forelse($tableRows as $row)
+                @php
+                    $statusCode = strtoupper((string) ($row->status ?? ''));
+                    $meta = $statusMeta[$statusCode] ?? ['label' => '-', 'class' => 'std-pill-alpa'];
+                @endphp
+                <div class="std-item">
+                    <div>
+                        <p class="std-item-date">{{ optional($row->tanggal)->translatedFormat('l, j F Y') ?? '-' }}</p>
+                        <p class="std-item-sub">{{ $row->subject->nama_mp ?? 'Mata pelajaran tidak diketahui' }}</p>
+                    </div>
+                    <span class="std-pill {{ $meta['class'] }}">{{ $meta['label'] }}</span>
+                </div>
+            @empty
+                <div class="std-item">
+                    <div>
+                        <p class="std-item-date">Belum ada data absensi</p>
+                        <p class="std-item-sub">Data riwayat absensi terbaru akan tampil di sini.</p>
+                    </div>
+                    <span class="std-pill std-pill-izin">Info</span>
+                </div>
+            @endforelse
+        </div>
+    </div>
 
-				<div class="table-responsive">
-					<table class="student-table">
-						<thead>
-							<tr>
-								<th>Tanggal</th>
-								<th>Mapel</th>
-								<th>Status</th>
-							</tr>
-						</thead>
-						<tbody>
-							@forelse($tableRows as $row)
-								@php
-									$statusCode = strtoupper((string) ($row->status ?? ''));
-									$pillClass = $statusCode === 'H' ? 'student-pill-h' : ($statusCode === 'I' ? 'student-pill-i' : 'student-pill-a');
-								@endphp
-								<tr>
-									<td>{{ optional($row->tanggal)->format('d M Y') ?? '-' }}</td>
-									<td>{{ $row->subject->nama_mp ?? '-' }}</td>
-									<td><span class="student-pill {{ $pillClass }}">{{ $statusCode ?: '-' }}</span></td>
-								</tr>
-							@empty
-								<tr>
-									<td colspan="3" class="text-center text-muted">Belum ada data terbaru.</td>
-								</tr>
-							@endforelse
-						</tbody>
-					</table>
-				</div>
-			</div>
-		</div>
-	</div>
+    <script>
+        (function () {
+            var hm = document.getElementById('std-hour-minute');
+            var sec = document.getElementById('std-seconds');
+            var full = document.getElementById('std-full-date');
+            if (!hm || !sec || !full) {
+                return;
+            }
+
+            function pad(value) {
+                return String(value).padStart(2, '0');
+            }
+
+            function updateClock() {
+                var now = new Date();
+                hm.textContent = pad(now.getHours()) + ':' + pad(now.getMinutes());
+                sec.textContent = ':' + pad(now.getSeconds());
+
+                var weekdays = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                var months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                full.textContent = weekdays[now.getDay()] + ', ' + pad(now.getDate()) + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+            }
+
+            updateClock();
+            setInterval(updateClock, 1000);
+        })();
+    </script>
 @endsection

@@ -265,7 +265,7 @@
         <div class="attendance-header">
             <div>
                 <h3 class="attendance-title">Absensi Siswa</h3>
-                <p class="attendance-subtitle">Halaman absensi siswa dengan tampilan terbaru.</p>
+                <p class="attendance-subtitle">Isi absensi pada jadwal yang sedang aktif.</p>
             </div>
             <div class="attendance-actions">
                 <a href="{{ route('reports.student-recap') }}" class="btn btn-default btn-sm">

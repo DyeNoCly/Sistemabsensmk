@@ -156,6 +156,30 @@
             margin-bottom: 12px;
         }
 
+        .attendance-mode-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0 14px;
+        }
+
+        .attendance-mode-btn {
+            border: 1px solid #bed4fb;
+            background: #fff;
+            color: #1f4d87;
+            border-radius: 999px;
+            padding: 8px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .attendance-mode-btn.active {
+            background: #1f6feb;
+            border-color: #1f6feb;
+            color: #fff;
+        }
+
         .attendance-status label {
             margin: 0;
             cursor: pointer;
@@ -293,6 +317,15 @@
 
         <div class="alert alert-info" style="margin-top: 12px; margin-bottom: 12px;">{{ $attendanceForm['message'] }}</div>
 
+        <div class="attendance-mode-buttons" id="attendanceModeButtons">
+            <button type="button" class="attendance-mode-btn" id="modeHadirBtn" data-status="H">
+                <i class="fa fa-check-circle"></i> Hadir
+            </button>
+            <button type="button" class="attendance-mode-btn" id="modeIzinBtn" data-status="I">
+                <i class="fa fa-file-text-o"></i> Izin
+            </button>
+        </div>
+
         <div class="attendance-grid">
             <div class="attendance-item">
                 <span class="label">Mata Pelajaran Aktif</span>
@@ -371,7 +404,7 @@
         <form method="post" action="{{ route('student-attendance.submit') }}" enctype="multipart/form-data" id="studentAttendanceForm" novalidate data-can-submit="{{ $attendanceForm['can_submit'] ? '1' : '0' }}">
             @csrf
 
-            <div class="attendance-status">
+            <div class="attendance-status" style="display:none;">
                 <label>
                     <input type="radio" name="attendance_status" value="H" {{ old('attendance_status') === 'H' ? 'checked' : '' }}>
                     Hadir
@@ -382,7 +415,7 @@
                 </label>
             </div>
 
-            <div class="attendance-row">
+            <div class="attendance-row" id="hadirFields">
                 <div class="form-group">
                     <label for="location">Lokasi GPS <span class="mandatory-badge">Wajib</span></label>
                     <input type="text" class="form-control" id="location" name="location" value="{{ old('location') }}" placeholder="Contoh: -6.200000,106.816666" readonly>
@@ -445,7 +478,7 @@
             </div>
 
             <button type="submit" class="btn btn-success submit-btn" style="margin-top: 12px; min-width: 180px;" id="submitBtn" disabled>
-                <i class="fa fa-send"></i> {{ $attendanceForm['can_submit'] ? 'Kirim Absensi' : 'Kirim Absensi (Jadwal Belum Aktif)' }}
+                <i class="fa fa-send"></i> <span id="submitBtnLabel">{{ $attendanceForm['can_submit'] ? 'Kirim Absensi' : 'Kirim Absensi (Jadwal Belum Aktif)' }}</span>
             </button>
         </form>
     </div>
@@ -468,6 +501,10 @@
             var locationMap = document.getElementById('locationMap');
             var evidenceField = document.getElementById('evidenceField');
             var statusRadios = form.querySelectorAll('input[name="attendance_status"]');
+            var hadirFields = document.getElementById('hadirFields');
+            var modeButtonsContainer = document.getElementById('attendanceModeButtons');
+            var modeHadirBtn = document.getElementById('modeHadirBtn');
+            var modeIzinBtn = document.getElementById('modeIzinBtn');
             var cameraPreview = document.getElementById('cameraPreview');
             var photoCanvas = document.getElementById('photoCanvas');
             var photoPreview = document.getElementById('photoPreview');
@@ -480,6 +517,7 @@
             var retakePhotoBtn = document.getElementById('retakePhoto');
             var evidenceInput = document.getElementById('evidence_file');
             var submitBtn = document.getElementById('submitBtn');
+            var submitBtnLabel = document.getElementById('submitBtnLabel');
             var stepGPS = document.getElementById('stepGPS');
             var stepPhoto = document.getElementById('stepPhoto');
             var stepSubmit = document.getElementById('stepSubmit');
@@ -511,14 +549,67 @@
             function selectHadirStatus() {
                 var hadirRadio = form.querySelector('input[name="attendance_status"][value="H"]');
                 if (hadirRadio) {
-                    hadirRadio.checked = true;
-                    syncEvidenceField();
+                    setAttendanceStatus('H');
                 }
             }
 
             function syncEvidenceField() {
                 var status = form.querySelector('input[name="attendance_status"]:checked');
-                evidenceField.style.display = status && status.value === 'I' ? '' : 'none';
+                var isIzin = status && status.value === 'I';
+                evidenceField.style.display = isIzin ? '' : 'none';
+                if (hadirFields) {
+                    hadirFields.style.display = isIzin ? 'none' : '';
+                }
+                if (isIzin) {
+                    stopCamera();
+                }
+            }
+
+            function updateModeButtons() {
+                if (!modeButtonsContainer) {
+                    return;
+                }
+
+                var status = form.querySelector('input[name="attendance_status"]:checked');
+                var selected = status ? status.value : '';
+                if (modeHadirBtn) {
+                    modeHadirBtn.classList.toggle('active', selected === 'H');
+                }
+                if (modeIzinBtn) {
+                    modeIzinBtn.classList.toggle('active', selected === 'I');
+                }
+            }
+
+            function updateSubmitLabel() {
+                if (!submitBtnLabel) {
+                    return;
+                }
+
+                var status = form.querySelector('input[name="attendance_status"]:checked');
+                var statusValue = status ? status.value : '';
+                var isIzin = statusValue === 'I';
+
+                if (canSubmitLocked) {
+                    submitBtnLabel.textContent = isIzin
+                        ? 'Kirim File & Simpan Izin (Jadwal Belum Aktif)'
+                        : 'Ambil Foto & Simpan Absensi (Jadwal Belum Aktif)';
+                    return;
+                }
+
+                submitBtnLabel.textContent = isIzin ? 'Kirim File & Simpan Izin' : 'Ambil Foto & Simpan Absensi';
+            }
+
+            function setAttendanceStatus(statusValue) {
+                var target = form.querySelector('input[name="attendance_status"][value="' + statusValue + '"]');
+                if (!target) {
+                    return;
+                }
+
+                target.checked = true;
+                syncEvidenceField();
+                updateModeButtons();
+                updateSubmitLabel();
+                updateStepsAndButton();
             }
 
             function updateMap(lat, lng) {
@@ -595,10 +686,10 @@
                 var hasEvidence = !!(evidenceInput && evidenceInput.files && evidenceInput.files.length > 0);
 
                 if (stepGPS) {
-                    stepGPS.classList.toggle('completed', hasLocation);
+                    stepGPS.classList.toggle('completed', statusValue === 'I' ? true : hasLocation);
                 }
                 if (stepPhoto) {
-                    stepPhoto.classList.toggle('completed', hasPhoto || hasEvidence);
+                    stepPhoto.classList.toggle('completed', statusValue === 'I' ? hasEvidence : hasPhoto);
                 }
 
                 var ready = false;
@@ -763,9 +854,25 @@
             statusRadios.forEach(function (radio) {
                 radio.addEventListener('change', function () {
                     syncEvidenceField();
+                    updateModeButtons();
+                    updateSubmitLabel();
                     updateStepsAndButton();
                 });
             });
+
+            if (modeButtonsContainer) {
+                modeButtonsContainer.addEventListener('click', function (event) {
+                    var button = event.target.closest('.attendance-mode-btn');
+                    if (!button || !modeButtonsContainer.contains(button)) {
+                        return;
+                    }
+
+                    var status = button.getAttribute('data-status');
+                    if (status === 'H' || status === 'I') {
+                        setAttendanceStatus(status);
+                    }
+                });
+            }
 
             form.addEventListener('submit', function (event) {
                 if (canSubmitLocked) {
@@ -817,9 +924,9 @@
                 syncMapFromLocation(locationInput.value);
             }
 
-            syncEvidenceField();
+            var initialStatus = form.querySelector('input[name="attendance_status"]:checked');
+            setAttendanceStatus(initialStatus ? initialStatus.value : 'H');
             setStatus(cameraStatus, 'Klik Aktifkan Kamera untuk mulai mengambil foto.', false);
-            updateStepsAndButton();
             window.addEventListener('beforeunload', stopCamera);
         })();
     </script>
